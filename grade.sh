@@ -4,19 +4,22 @@ rm -rf student-submission
 git clone $1 student-submission
 echo 'Finished cloning'
 
-if [[ -f student-submission/ListExamples.java ]]
+cd student-submission
+
+if [[ -f ListExamples.java ]]
 then
   echo 'ListExamples.java found'
 else
   echo 'ListExamples.java not found'
-  echo 'Score: 0/4'
+  echo 'Score: 0/4'  
+  exit
 fi
 
-cp student-submission/ListExamples.java ./
+#cp student-submission/ListExamples.java ./
 
 javac -cp $CPATH *.java
 
-java -cp $CPATH org.junit.runner.JUnitCore TestListExamples > junit-output.txt
+java -cp $CPATH org.junit.runner.JUnitCore TestListExamples > output.log
 
 # The strategy used here relies on the last few lines of JUnit output, which
 # looks like:
@@ -31,7 +34,11 @@ FAILURES=`grep -c FAILURES!!! junit-output.txt`
 if [[ $FAILURES -eq 0 ]]
 then
   echo 'All tests passed'
-  echo '4/4'
+  echo ""
+  echo "--------------"
+  echo "| Score: 4/4 |"
+  echo "--------------"
+  echo ""
 else
   # The ${VAR:N:M} syntax gets a substring of length M starting at index N
   # Note that since this is a precise character count into the "Tests run:..."
@@ -42,8 +49,10 @@ else
   # https://stackoverflow.com/questions/16484972/how-to-extract-a-substring-in-bash
   # https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Shell-Parameter-Expansion
 
-  RESULT_LINE=`grep "Tests run:" junit-output.txt`
-  COUNT=${RESULT_LINE:25:1}
+  line=`grep 'Tests run:' junit-output.txt`
+  #RESULT_LINE=`grep "Tests run:" junit-output.txt`
+  #COUNT=${RESULT_LINE:25:1}
+  failures=${line:(-1)}
 
   echo "JUnit output was:"
   cat junit-output.txt
@@ -53,4 +62,5 @@ else
   echo "--------------"
   echo ""
 fi
+
 
